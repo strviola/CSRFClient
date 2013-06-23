@@ -2,7 +2,8 @@ package strviola.csrf;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.http.HttpEntity;
+import java.util.HashMap;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -13,6 +14,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -22,6 +24,7 @@ import org.apache.http.util.EntityUtils;
 
 public class Connect {
 	public static final String localhost = "http://127.0.0.1:8000";
+	public static final String yahoo = "http://www.yahoo.co.jp";
 	private static CookieStore cookie = new BasicCookieStore();
 	private static HttpContext ctx = new BasicHttpContext();
 	
@@ -90,14 +93,35 @@ public class Connect {
 					@Override
 					public String handleResponse(HttpResponse response)
 							throws ClientProtocolException, IOException {
-						if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-							return EntityUtils.toString((HttpEntity) response, "utf-8");
+						if (response.getStatusLine().getStatusCode() ==
+								HttpStatus.SC_OK) {
+							return EntityUtils.toString(
+									response.getEntity(), "utf-8");
 						} else {
 							return response.getStatusLine().toString();
 						}
 					}
 				}, ctx);
 		return response;
+	}
+
+	public static HashMap<String, String> getCookies() {
+		HashMap<String, String> cookies = new HashMap<String, String>();
+		for (Cookie c: cookie.getCookies()) {
+			System.out.println(c.getName() + "=" + c.getValue());
+			cookies.put(c.getName(), c.getValue());
+		}
+		return cookies;
+	}
+
+	public static String getCookieByName(String key) {
+		for (Cookie c: cookie.getCookies()) {
+			if (c.getName().equals(key)) {
+				return c.getValue();
+			}
+		}
+		// cookie not found
+		return null;
 	}
 
 }
